@@ -1,0 +1,66 @@
+const express = require("express");
+const Promotion = require("../models/promotion");
+
+const promotionRouter = express.Router();
+
+promotionRouter
+  .route("/")
+  .get((req, res, next) => {
+    Promotion.find()
+      .then((promotions) => res.status(200).json(promotions))
+      .catch((err) => next(err));
+  })
+  .post((req, res, next) => {
+    Promotion.create(req.body)
+      .then((promotion) => {
+        res.status(200).json(promotion);
+      })
+      .catch((err) => next(err));
+  })
+  .put((req, res, next) => {
+    res.statusCode = 403;
+    res.end("PUT operation not supported on /promotions");
+  })
+  .delete((req, res, next) => {
+    Promotion.deleteMany()
+      .then((result) => {
+        res.status(200).json(result);
+      })
+      .catch((err) => next(err));
+  });
+
+promotionRouter
+  .route("/:promotionId")
+  .get((req, res) => {
+    Promotion.findById(req.params.promotionId)
+      .then((promotion) => {
+        res.status(200).json(promotion);
+      })
+      .catch((err) => next(err));
+  })
+  .post((req, res) => {
+    res.statusCode = 403;
+    res.end(
+      `POST operation not supported on /promotions/${req.params.promotionId}`
+    );
+  })
+  .put((req, res) => {
+    Promotion.findByIdAndUpdate(
+      req.params.promotionId,
+      { $set: req.body },
+      { new: true }
+    )
+      .then((promotion) => {
+        res.status(200).json(promotion);
+      })
+      .catch((err) => next(err));
+  })
+  .delete((req, res) => {
+    Promotion.findByIdAndDelete(req.params.promotionId)
+      .then((result) => {
+        res.status(200).json(result);
+      })
+      .catch((err) => next(err));
+  });
+
+module.exports = promotionRouter;
