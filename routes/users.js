@@ -2,12 +2,14 @@ const express = require("express");
 const User = require("../models/user");
 const passport = require("passport");
 const authenticate = require("../authenticate");
+const cors = require("./cors");
 
 const router = express.Router();
 
 /* GET users listing. */
 router.get(
   "/",
+  cors.corsWithOptions,
   authenticate.verifyUser,
   authenticate.verifyAdmin,
   (req, res, next) => {
@@ -19,7 +21,7 @@ router.get(
   }
 );
 
-router.post("/signup", (req, res) => {
+router.post("/signup", cors.corsWithOptions, (req, res) => {
   const user = new User({ username: req.body.username });
   User.register(user, req.body.password)
     .then((registeredUser) => {
@@ -46,6 +48,7 @@ router.post("/signup", (req, res) => {
 });
 router.post(
   "/login",
+  cors.corsWithOptions,
   passport.authenticate("local", { session: false }),
   (req, res) => {
     const token = authenticate.getToken({ _id: req.user._id });
@@ -59,7 +62,7 @@ router.post(
   }
 );
 
-router.get("/logout", (req, res, next) => {
+router.get("/logout", cors.corsWithOptions, (req, res, next) => {
   if (req.session && req.session.user) {
     // Check for a specific user property
     req.session.destroy((err) => {
